@@ -16,7 +16,7 @@ func TestAtanS(t *testing.T) {
 		x := floatInRange(rng, -1e10, 1e10)
 		got := float64(AtanS(float32(x)))
 		want := math.Atan(x)
-		assert.scalar(got, want)
+		assert.scalar(x, got, want)
 	}
 }
 
@@ -31,7 +31,7 @@ func TestAtan2S(t *testing.T) {
 		y := floatInRange(rng, -1e10, 1e10)
 		got := float64(Atan2S(float32(y), float32(x)))
 		want := math.Atan2(y, x)
-		assert.scalar(got, want)
+		assert.scalar(y/x, got, want)
 	}
 }
 
@@ -45,28 +45,6 @@ func TestAbsS(t *testing.T) {
 		x := float32(floatInRange(rng, -1e10, 1e10))
 		got := AbsS(x)
 		want := naiveAbs(x)
-		assert.scalar(float64(got), float64(want))
+		assert.scalar(float64(x), float64(got), float64(want))
 	}
-}
-
-func floatInRange(r *rand.Rand, x1, x2 float64) float64 {
-	return x1 + r.Float64()*(x2-x1)
-}
-
-type toleranceAsserter struct {
-	t   testing.TB
-	tol float64
-}
-
-func (as *toleranceAsserter) scalar(got, want float64) {
-	if math.Abs(got-want) > as.tol {
-		as.t.Errorf("got %g, want %g", got, want)
-	}
-}
-
-func naiveAbs(x float32) float32 {
-	if x < 0 {
-		return -x
-	}
-	return x
 }

@@ -1,4 +1,5 @@
 // Reference: glibc
+// sysdeps/ieee754/flt-32/...
 
 package math
 
@@ -37,35 +38,40 @@ var sincosTable1 = &sincos{
 
 func CosS(y float32) float32 {
 	const pio4 = Pi / 4
-
-	x := y
+	var n int
 	sincost := sincosTable0
 	switch {
 	case absToP12s(y) < absToP12s(pio4):
-
-		x2 := x * x
 		if absToP12s(y) < absToP12s(0x1p-12) {
 			return 1
 		}
-		return sinPolyS(x, x2, sincost, 1)
+		return sinPolyS(y, y*y, sincost, 1)
 
 	case absToP12s(y) < absToP12s(120):
-		var n int
-		x, n = reducePi(x, sincost)
+
+		y, n = reducePi(y, sincost)
 
 		// Setup the signs for sin and cos.
 		s := sincost.sign[n&3]
 		if n&2 != 0 {
 			sincost = sincosTable1
 		}
-		return sinPolyS(x*s, x*x, sincost, n^1)
+		return sinPolyS(y*s, y*y, sincost, n^1)
 
 	case absToP12s(y) < absToP12s(InfS(1)):
-		// xi := Float32bits(y)
-		// sign := xi >> 31
-		return 0
+		xi := Float32bits(y)
+		sign := xi >> 31
+
+		y, n = reduceLargePi(xi)
+
+		s := sincost.sign[(n+int(sign))&3]
+		if (n+int(sign))&2 != 0 {
+			sincost = sincosTable1
+		}
+		return sinPolyS(y*s, y*y, sincost, n^1)
+
 	default:
-		return InfS(1)
+		return NaNS()
 	}
 }
 
@@ -83,6 +89,7 @@ func sinPolyS(x, x2 float32, p *sincos, n int) float32 {
 	if n&1 == 0 {
 		x3 := x * x2
 		s1 := p.s2 + x2*p.s3
+
 		x7 := x3 * x2
 		s := x + x3*p.s1
 		return s + x7*s1
@@ -91,6 +98,7 @@ func sinPolyS(x, x2 float32, p *sincos, n int) float32 {
 	x4 := x2 * x2
 	c2 := p.c3 + x2*p.c4
 	c1 := p.c0 + x2*p.c1
+
 	x6 := x4 * x2
 	c := c1 + x4*p.c2
 	return c + x6*c2
@@ -105,6 +113,32 @@ func reducePi(x float32, p *sincos) (float32, int) {
 	return x - float32(n)*p.hpi, n
 }
 
-func reduceLargePi(xi uint32) (float32, int) {
+var invpio4 = [24]uint32{
+	0xa2, 0xa2f9, 0xa2f983, 0xa2f9836e,
+	0xf9836e4e, 0x836e4e44, 0x6e4e4415, 0x4e441529,
+	0x441529fc, 0x1529fc27, 0x29fc2757, 0xfc2757d1,
+	0x2757d1f5, 0x57d1f534, 0xd1f534dd, 0xf534ddc0,
+	0x34ddc0db, 0xddc0db62, 0xc0db6295, 0xdb629599,
+	0x6295993c, 0x95993c43, 0x993c4390, 0x3c439041,
+}
 
+func reduceLargePi(xi uint32) (float32, int) {
+	const pi63 = 0x1.921FB54442D18p-62
+
+	arr := invpio4[(xi>>26)&15:]
+	shift := int((xi >> 23) & 7)
+	xi = (xi & 0xffffff) | 0x800000
+	xi <<= shift
+
+	var res0, res1, res2, n uint64
+	res0 = uint64(xi) * uint64(arr[0])
+	res1 = uint64(xi) * uint64(arr[4])
+	res2 = uint64(xi) * uint64(arr[8])
+	res0 = (res2 >> 32) | (res0 << 32)
+	res0 += res1
+
+	n = (res0 + (1 << 61)) >> 62
+	res0 -= n << 62
+	x := int64(res0)
+	return float32(x) * pi63, int(n)
 }
