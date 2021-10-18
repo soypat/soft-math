@@ -2,7 +2,7 @@
 
 package math
 
-func Atan2s(y, x float32) float32 {
+func Atan2S(y, x float32) float32 {
 	const (
 		pio2 = Pi / 2
 		pio4 = Pi / 4
@@ -19,7 +19,7 @@ func Atan2s(y, x float32) float32 {
 	}
 	if hx == i32FromBits(0x3f800000) {
 		// x==1.0
-		return Atans(y)
+		return AtanS(y)
 	}
 
 	// 2*sign(x)+sign(y)
@@ -89,7 +89,7 @@ func Atan2s(y, x float32) float32 {
 		z = 0
 	} else {
 		// safe to do y/x
-		z = Atans(Abss(y / x))
+		z = AtanS(Abss(y / x))
 	}
 	switch m {
 	case 0:
@@ -132,7 +132,7 @@ var (
 	}
 )
 
-func Atans(x float32) float32 {
+func AtanS(x float32) float32 {
 	const huge = 1e30
 	var id int32
 	hx := floati32bits(x)

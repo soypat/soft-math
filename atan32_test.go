@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestAtans(t *testing.T) {
+func TestAtanS(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
 	assert := toleranceAsserter{
 		t,
@@ -14,13 +14,13 @@ func TestAtans(t *testing.T) {
 	}
 	for i := 0; i < 10000; i++ {
 		x := floatInRange(rng, -1e10, 1e10)
-		got := float64(Atans(float32(x)))
+		got := float64(AtanS(float32(x)))
 		want := math.Atan(x)
 		assert.scalar(got, want)
 	}
 }
 
-func TestAtan2s(t *testing.T) {
+func TestAtan2S(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
 	assert := toleranceAsserter{
 		t,
@@ -29,13 +29,13 @@ func TestAtan2s(t *testing.T) {
 	for i := 0; i < 1000; i++ {
 		x := floatInRange(rng, -1e10, 1e10)
 		y := floatInRange(rng, -1e10, 1e10)
-		got := float64(Atan2s(float32(y), float32(x)))
+		got := float64(Atan2S(float32(y), float32(x)))
 		want := math.Atan2(y, x)
 		assert.scalar(got, want)
 	}
 }
 
-func TestAbss(t *testing.T) {
+func TestAbsS(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
 	assert := toleranceAsserter{
 		t,

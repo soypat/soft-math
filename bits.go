@@ -33,8 +33,13 @@ func Abs(x float64) float64 {
 	return Float64frombits(Float64bits(x) &^ (1 << 63))
 }
 
-func Abss(x float32) float32 {
+func AbsS(x float32) float32 {
 	return Float32frombits(Float32bits(x) &^ (1 << 31))
+}
+
+// Top 12 bits of the float representation with the sign bit cleared.
+func absToP12s(x float32) uint32 {
+	return (Float32bits(x) >> 20) & mask
 }
 
 // Inf returns positive infinity if sign >= 0, negative infinity if sign < 0.
@@ -46,6 +51,17 @@ func Inf(sign int) float64 {
 		v = uvneginf
 	}
 	return Float64frombits(v)
+}
+
+// Inf returns positive infinity if sign >= 0, negative infinity if sign < 0.
+func InfS(sign int) float32 {
+	var v uint32
+	if sign >= 0 {
+		v = uvinfs
+	} else {
+		v = uvneginfs
+	}
+	return Float32frombits(v)
 }
 
 // NaN returns an IEEE 754 ``not-a-number'' value.

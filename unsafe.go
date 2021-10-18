@@ -29,3 +29,7 @@ func Float64bits(f float64) uint64 { return *(*uint64)(unsafe.Pointer(&f)) }
 // and the result in the same bit position.
 // Float64frombits(Float64bits(x)) == x.
 func Float64frombits(b uint64) float64 { return *(*float64)(unsafe.Pointer(&b)) }
+
+func i32FromBits(b uint32) int32 {
+	return *(*int32)(unsafe.Pointer(&b))
+}
