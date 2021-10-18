@@ -43,7 +43,7 @@ func TestAbsS(t *testing.T) {
 	}
 	for i := 0; i < 1000; i++ {
 		x := float32(floatInRange(rng, -1e10, 1e10))
-		got := Abss(x)
+		got := AbsS(x)
 		want := naiveAbs(x)
 		assert.scalar(float64(got), float64(want))
 	}

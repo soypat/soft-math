@@ -2,8 +2,6 @@
 
 package math
 
-import "unsafe"
-
 const (
 	uvnan    = 0x7FF8000000000001
 	uvinf    = 0x7FF0000000000000
@@ -18,10 +16,10 @@ const (
 
 // 32bit float constants
 const (
-	uvnans    uint32 = 0x7fc00000
-	uvinfs    uint32 = 0x7f800000
-	uvneginfs uint32 = 0xff800000
-	uvones    uint32 = 0x3f800000
+	uvnanS    uint32 = 0x7fc00000
+	uvinfS    uint32 = 0x7f800000
+	uvneginfS uint32 = 0xff800000
+	uvoneS    uint32 = 0x3f800000
 )
 
 // Abs returns the absolute value of x.
@@ -57,15 +55,18 @@ func Inf(sign int) float64 {
 func InfS(sign int) float32 {
 	var v uint32
 	if sign >= 0 {
-		v = uvinfs
+		v = uvinfS
 	} else {
-		v = uvneginfs
+		v = uvneginfS
 	}
 	return Float32frombits(v)
 }
 
 // NaN returns an IEEE 754 ``not-a-number'' value.
 func NaN() float64 { return Float64frombits(uvnan) }
+
+// NaN returns an IEEE 754 ``not-a-number'' value.
+func NaNS() float32 { return Float32frombits(uvnanS) }
 
 // IsNaN reports whether f is an IEEE 754 ``not-a-number'' value.
 func IsNaN(f float64) (is bool) {
@@ -87,9 +88,9 @@ func IsInf(f float64, sign int) bool {
 	return sign >= 0 && x == uvinf || sign <= 0 && x == uvneginf
 }
 
-func IsInfs(f float32, sign int) bool {
+func IsInfS(f float32, sign int) bool {
 	x := Float32bits(f)
-	return sign >= 0 && x == uvinfs || sign <= 0 && x == uvneginfs
+	return sign >= 0 && x == uvinfS || sign <= 0 && x == uvneginfS
 }
 
 // normalize returns a normal number y and exponent exp
@@ -100,8 +101,4 @@ func normalize(x float64) (y float64, exp int) {
 		return x * (1 << 52), -52
 	}
 	return x, 0
-}
-
-func i32FromBits(b uint32) int32 {
-	return *(*int32)(unsafe.Pointer(&b))
 }

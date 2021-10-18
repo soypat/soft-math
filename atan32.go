@@ -46,8 +46,8 @@ func Atan2S(y, x float32) float32 {
 	}
 
 	// when x is infinity
-	if IsInfs(x, 0) {
-		if IsInfs(y, 0) {
+	if IsInfS(x, 0) {
+		if IsInfS(y, 0) {
 			switch m {
 			case 0:
 				return pio4 + tiny // atan(+INF,+INF)
@@ -72,7 +72,7 @@ func Atan2S(y, x float32) float32 {
 	}
 
 	// when y is infinity
-	if IsInfs(y, 0) {
+	if IsInfS(y, 0) {
 		if hy < 0 {
 			return -pio2 - tiny
 		}
@@ -89,7 +89,7 @@ func Atan2S(y, x float32) float32 {
 		z = 0
 	} else {
 		// safe to do y/x
-		z = AtanS(Abss(y / x))
+		z = AtanS(AbsS(y / x))
 	}
 	switch m {
 	case 0:
@@ -157,7 +157,7 @@ func AtanS(x float32) float32 {
 		}
 		id = -1
 	} else {
-		x = Abss(x)
+		x = AbsS(x)
 		if ix < i32FromBits(0x3f980000) {
 			// |x| < 1.1875
 			if ix < i32FromBits(0x3f300000) {
