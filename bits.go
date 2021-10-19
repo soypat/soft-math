@@ -16,10 +16,14 @@ const (
 
 // 32bit float constants
 const (
-	uvnanS    uint32 = 0x7fc00000
-	uvinfS    uint32 = 0x7f800000
-	uvneginfS uint32 = 0xff800000
-	uvoneS    uint32 = 0x3f800000
+	uvnanS    uint32 = 0x7FE00000
+	uvinfS    uint32 = 0x7F800000
+	uvneginfS uint32 = 0xFF800000
+	uvoneS    uint32 = 0x3F800000
+	maskS            = 0xFF
+	biasS            = 127
+	shiftS           = 32 - 8 - 1
+	fracMaskS        = 1<<shiftS - 1
 )
 
 // Abs returns the absolute value of x.
@@ -77,6 +81,16 @@ func IsNaN(f float64) (is bool) {
 	return f != f
 }
 
+// IsNaNS reports whether f is an IEEE 754 ``not-a-number'' value.
+func IsNaNS(f float32) (is bool) {
+	x := Float32bits(f)
+	return uint32(x>>shiftS)&maskS == maskS && x != uvinfS && x != uvneginfS
+}
+
+func isZeroInfNaN(ix uint32) bool {
+	return 2*ix-1 >= 2*0x7f800000-1
+}
+
 // IsInf reports whether f is an infinity, according to sign.
 // If sign > 0, IsInf reports whether f is positive infinity.
 // If sign < 0, IsInf reports whether f is negative infinity.
@@ -93,12 +107,29 @@ func IsInfS(f float32, sign int) bool {
 	return sign >= 0 && x == uvinfS || sign <= 0 && x == uvneginfS
 }
 
+// Copysign returns a value with the magnitude
+// of x and the sign of y.
+func CopysignS(x, y float32) float32 {
+	const sign = 1 << 31
+	return Float32frombits(Float32bits(x)&^sign | Float32bits(y)&sign)
+}
+
 // normalize returns a normal number y and exponent exp
 // satisfying x == y × 2**exp. It assumes x is finite and non-zero.
 func normalize(x float64) (y float64, exp int) {
 	const SmallestNormal = 2.2250738585072014e-308 // 2**-1022
 	if Abs(x) < SmallestNormal {
-		return x * (1 << 52), -52
+		return x * (1 << shift), -shift
+	}
+	return x, 0
+}
+
+// normalize returns a normal number y and exponent exp
+// satisfying x == y × 2**exp. It assumes x is finite and non-zero.
+func normalizeS(x float32) (y float32, exp int) {
+	const SmallestNormal = 0x1p-126 // 2**-126
+	if AbsS(x) < SmallestNormal {
+		return x * (1 << shiftS), -shiftS
 	}
 	return x, 0
 }
